@@ -5,6 +5,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
+        pathname: "/**", // <-- allow all paths
       },
     ],
   },
