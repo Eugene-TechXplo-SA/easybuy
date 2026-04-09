@@ -2,13 +2,14 @@ import { useState } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 
-const PriceDropdown = () => {
-  const [toggleDropdown, setToggleDropdown] = useState(true);
+type PriceDropdownProps = {
+  minPrice: number;
+  maxPrice: number;
+  onPriceChange: (min: number, max: number) => void;
+};
 
-  const [selectedPrice, setSelectedPrice] = useState({
-    from: 0,
-    to: 100,
-  });
+const PriceDropdown = ({ minPrice, maxPrice, onPriceChange }: PriceDropdownProps) => {
+  const [toggleDropdown, setToggleDropdown] = useState(true);
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -43,7 +44,6 @@ const PriceDropdown = () => {
         </button>
       </div>
 
-      {/* // <!-- dropdown menu --> */}
       <div className={`p-6 ${toggleDropdown ? 'block' : 'hidden'}`}>
         <div id="pricingOne">
           <div className="price-range">
@@ -52,10 +52,7 @@ const PriceDropdown = () => {
               className="margin-lg"
               step={'any'}
               onInput={(e) =>
-                setSelectedPrice({
-                  from: Math.floor(e[0]),
-                  to: Math.ceil(e[1]),
-                })
+                onPriceChange(Math.floor(e[0]), Math.ceil(e[1]))
               }
             />
 
@@ -65,7 +62,7 @@ const PriceDropdown = () => {
                   $
                 </span>
                 <span id="minAmount" className="block px-3 py-1.5">
-                  {selectedPrice.from}
+                  {minPrice}
                 </span>
               </div>
 
@@ -74,7 +71,7 @@ const PriceDropdown = () => {
                   $
                 </span>
                 <span id="maxAmount" className="block px-3 py-1.5">
-                  {selectedPrice.to}
+                  {maxPrice}
                 </span>
               </div>
             </div>

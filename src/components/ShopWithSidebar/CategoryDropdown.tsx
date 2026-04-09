@@ -1,15 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import type { ApiCategory } from "@/types/product";
 
-const CategoryItem = ({ category }) => {
-  const [selected, setSelected] = useState(false);
+type CategoryItemProps = {
+  category: ApiCategory;
+  selected: boolean;
+  onToggle: (id: number) => void;
+};
+
+const CategoryItem = ({ category, selected, onToggle }: CategoryItemProps) => {
   return (
     <button
       className={`${
         selected && "text-blue"
       } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
-      onClick={() => setSelected(!selected)}
+      onClick={() => onToggle(category.id)}
     >
       <div className="flex items-center gap-2">
         <div
@@ -35,22 +41,28 @@ const CategoryItem = ({ category }) => {
           </svg>
         </div>
 
-        <span>{category.name}</span>
+        <span>{category.title}</span>
       </div>
-
-      <span
-        className={`${
-          selected ? "text-white bg-blue" : "bg-gray-2"
-        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-blue`}
-      >
-        {category.products}
-      </span>
     </button>
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
+type CategoryDropdownProps = {
+  categories: ApiCategory[];
+  selectedCategory: number | null;
+  onSelect: (id: number | null) => void;
+};
+
+const CategoryDropdown = ({
+  categories,
+  selectedCategory,
+  onSelect,
+}: CategoryDropdownProps) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
+
+  const handleToggle = (id: number) => {
+    onSelect(selectedCategory === id ? null : id);
+  };
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -88,15 +100,18 @@ const CategoryDropdown = ({ categories }) => {
         </button>
       </div>
 
-      {/* dropdown && 'shadow-filter */}
-      {/* <!-- dropdown menu --> */}
       <div
         className={`flex-col gap-3 py-6 pl-6 pr-5.5 ${
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {categories.map((category, key) => (
-          <CategoryItem key={key} category={category} />
+        {categories.map((category) => (
+          <CategoryItem
+            key={category.id}
+            category={category}
+            selected={selectedCategory === category.id}
+            onToggle={handleToggle}
+          />
         ))}
       </div>
     </div>
