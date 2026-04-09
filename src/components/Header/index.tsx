@@ -64,14 +64,12 @@ const Header = () => {
           {/* <!-- header top left --> */}
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
             <Link className="flex-shrink-0" href="/">
-             <Image
-  src="https://i.ibb.co/qM881R7y/Untitled-design-4.png"
-  alt="Penyesa Logo"
-  width={140}
-  height={50}
-  priority
-/>
-
+              <Image
+                src="/images/logo/logo.svg"
+                alt="Logo"
+                width={219}
+                height={36}
+              />
             </Link>
 
             <div className="max-w-[475px] w-full">
