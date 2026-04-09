@@ -65,7 +65,7 @@ const Header = () => {
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
             <Link className="flex-shrink-0" href="/">
              <Image
-  src="https://raw.githubusercontent.com/DONNELL-TECHXPLO-SA/PenyesaImages/099f08c0d2f57b241d079391621ede970ef6fb5c/Untitled%20design%20(4).png"
+  src="https://i.ibb.co/qM881R7y/Untitled-design-4.png"
   alt="Penyesa Logo"
   width={140}
   height={50}

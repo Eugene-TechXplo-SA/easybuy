@@ -4,8 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "raw.githubusercontent.com",
-        pathname: "/**", // <-- allow all paths
+        hostname: "i.ibb.co",
       },
     ],
   },
