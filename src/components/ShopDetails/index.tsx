@@ -6,6 +6,7 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
+import { formatZar } from "@/lib/formatCurrency";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
@@ -316,11 +317,11 @@ const ShopDetails = () => {
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
                     <span className="text-sm sm:text-base text-dark">
-                      Price: ${product.price}
+                      Price: {formatZar(product.price)}
                     </span>
                     <span className="line-through">
                       {" "}
-                      ${product.discountedPrice}{" "}
+                      {formatZar(product.discountedPrice)} {" "}
                     </span>
                   </h3>
 
