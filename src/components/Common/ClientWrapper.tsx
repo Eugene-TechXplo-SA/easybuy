@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ModalProvider } from "@/app/context/QuickViewModalContext";
 import { CartModalProvider } from "@/app/context/CartSidebarModalContext";
 import { ReduxProvider } from "@/redux/provider";
+import { AuthProvider } from "@/app/context/AuthContext";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
@@ -25,19 +26,21 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
         <PreLoader />
       ) : (
         <>
-          <ReduxProvider>
-            <CartModalProvider>
-              <ModalProvider>
-                <PreviewSliderProvider>
-                  <Header />
-                  {children}
-                  <QuickViewModal />
-                  <CartSidebarModal />
-                  <PreviewSliderModal />
-                </PreviewSliderProvider>
-              </ModalProvider>
-            </CartModalProvider>
-          </ReduxProvider>
+          <AuthProvider>
+            <ReduxProvider>
+              <CartModalProvider>
+                <ModalProvider>
+                  <PreviewSliderProvider>
+                    <Header />
+                    {children}
+                    <QuickViewModal />
+                    <CartSidebarModal />
+                    <PreviewSliderModal />
+                  </PreviewSliderProvider>
+                </ModalProvider>
+              </CartModalProvider>
+            </ReduxProvider>
+          </AuthProvider>
           <ScrollToTop />
           <Footer />
         </>
