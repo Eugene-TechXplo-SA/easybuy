@@ -3,13 +3,12 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Image from "next/image";
 import { formatZar } from "@/lib/formatCurrency";
-import { removeItemFromCartAsync } from "@/redux/features/cart-slice";
 
-const SingleItem = ({ item }) => {
+const SingleItem = ({ item, removeItemFromCart }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleRemoveFromCart = () => {
-    dispatch(removeItemFromCartAsync(item.id));
+    dispatch(removeItemFromCart(item.id));
   };
 
   return (
