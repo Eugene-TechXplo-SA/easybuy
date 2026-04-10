@@ -3,7 +3,7 @@ import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
 
 import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { addItemToCartAsync } from "@/redux/features/cart-slice";
 
 import Image from "next/image";
 import { formatZar } from "@/lib/formatCurrency";
@@ -17,7 +17,7 @@ const SingleItem = ({ item }) => {
 
   const handleAddToCart = () => {
     dispatch(
-      addItemToCart({
+      addItemToCartAsync({
         ...item,
         quantity: 1,
       })
