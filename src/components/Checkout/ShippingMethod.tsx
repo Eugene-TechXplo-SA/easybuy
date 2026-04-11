@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
+import { UseFormRegister } from "react-hook-form";
+import { CheckoutFormData } from "./checkoutSchema";
 import { formatZar } from "@/lib/formatCurrency";
 
-const ShippingMethod = () => {
-  const [shippingMethod, setShippingMethod] = useState("free");
+type Props = {
+  register: UseFormRegister<CheckoutFormData>;
+  value: string;
+};
+
+const ShippingMethod = ({ register, value }: Props) => {
   return (
     <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
       <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
@@ -13,23 +19,20 @@ const ShippingMethod = () => {
       <div className="p-4 sm:p-8.5">
         <div className="flex flex-col gap-4">
           <label
-            htmlFor="free"
+            htmlFor="shippingMethod-free"
             className="flex cursor-pointer select-none items-center gap-3.5"
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="free"
-                id="free"
+                type="radio"
+                id="shippingMethod-free"
+                value="free"
+                {...register("shippingMethod")}
                 className="sr-only"
-                onChange={() => setShippingMethod("free")}
               />
-              {/* selectShipping === 'free' ? 'border-4 border-blue' : 'border border-gray-4' */}
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "free"
-                    ? "border-4 border-blue"
-                    : "border border-gray-4"
+                  value === "free" ? "border-4 border-blue" : "border border-gray-4"
                 }`}
               ></div>
             </div>
@@ -37,22 +40,20 @@ const ShippingMethod = () => {
           </label>
 
           <label
-            htmlFor="fedex"
+            htmlFor="shippingMethod-fedex"
             className="flex cursor-pointer select-none items-center gap-3.5"
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="fedex"
-                id="fedex"
+                type="radio"
+                id="shippingMethod-fedex"
+                value="fedex"
+                {...register("shippingMethod")}
                 className="sr-only"
-                onChange={() => setShippingMethod("fedex")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "fedex"
-                    ? "border-4 border-blue"
-                    : "border border-gray-4"
+                  value === "fedex" ? "border-4 border-blue" : "border border-gray-4"
                 }`}
               ></div>
             </div>
@@ -60,14 +61,8 @@ const ShippingMethod = () => {
             <div className="rounded-md border-[0.5px] py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none">
               <div className="flex items-center">
                 <div className="pr-4">
-                  <Image
-                    src="/images/checkout/fedex.svg"
-                    alt="fedex"
-                    width={64}
-                    height={18}
-                  />
+                  <Image src="/images/checkout/fedex.svg" alt="fedex" width={64} height={18} />
                 </div>
-
                 <div className="border-l border-gray-4 pl-4">
                   <p className="font-semibold text-dark">{formatZar(10.99)}</p>
                   <p className="text-custom-xs">Standard Shipping</p>
@@ -77,22 +72,20 @@ const ShippingMethod = () => {
           </label>
 
           <label
-            htmlFor="dhl"
+            htmlFor="shippingMethod-dhl"
             className="flex cursor-pointer select-none items-center gap-3.5"
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="dhl"
-                id="dhl"
+                type="radio"
+                id="shippingMethod-dhl"
+                value="dhl"
+                {...register("shippingMethod")}
                 className="sr-only"
-                onChange={() => setShippingMethod("dhl")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "dhl"
-                    ? "border-4 border-blue"
-                    : "border border-gray-4"
+                  value === "dhl" ? "border-4 border-blue" : "border border-gray-4"
                 }`}
               ></div>
             </div>
@@ -100,14 +93,8 @@ const ShippingMethod = () => {
             <div className="rounded-md border-[0.5px] py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none">
               <div className="flex items-center">
                 <div className="pr-4">
-                  <Image
-                    src="/images/checkout/dhl.svg"
-                    alt="dhl"
-                    width={64}
-                    height={20}
-                  />
+                  <Image src="/images/checkout/dhl.svg" alt="dhl" width={64} height={20} />
                 </div>
-
                 <div className="border-l border-gray-4 pl-4">
                   <p className="font-semibold text-dark">{formatZar(12.5)}</p>
                   <p className="text-custom-xs">Standard Shipping</p>
