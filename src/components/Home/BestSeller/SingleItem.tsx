@@ -8,7 +8,7 @@ import { updateQuickView } from "@/redux/features/quickView-slice";
 import { addItemToCartDb } from "@/redux/features/cart-slice";
 import Image from "next/image";
 import Link from "next/link";
-import { addItemToWishlist } from "@/redux/features/wishlist-slice";
+import { addItemToWishlistDb } from "@/redux/features/wishlist-slice";
 import { formatZar } from "@/lib/formatCurrency";
 
 const SingleItem = ({ item }: { item: Product }) => {
@@ -32,7 +32,7 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   const handleItemToWishList = () => {
     dispatch(
-      addItemToWishlist({
+      addItemToWishlistDb({
         ...item,
         status: "available",
         quantity: 1,
