@@ -2,10 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
-import {
-  removeItemFromCart,
-  selectTotalPrice,
-} from "@/redux/features/cart-slice";
+import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { useAppSelector } from "@/redux/store";
 import { useSelector } from "react-redux";
 import SingleItem from "./SingleItem";
@@ -83,7 +80,6 @@ const CartSidebarModal = () => {
                   <SingleItem
                     key={key}
                     item={item}
-                    removeItemFromCart={removeItemFromCart}
                   />
                 ))
               ) : (

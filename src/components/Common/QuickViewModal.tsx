@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { addItemToCartDb } from "@/redux/features/cart-slice";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -33,7 +33,7 @@ const QuickViewModal = () => {
   // add to cart
   const handleAddToCart = () => {
     dispatch(
-      addItemToCart({
+      addItemToCartDb({
         ...product,
         quantity,
       })

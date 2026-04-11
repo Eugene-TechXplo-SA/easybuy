@@ -3,7 +3,9 @@ import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import {
   removeItemFromCart,
+  removeItemFromCartDb,
   updateCartItemQuantity,
+  updateCartItemQuantityDb,
 } from "@/redux/features/cart-slice";
 
 import Image from "next/image";
@@ -15,18 +17,32 @@ const SingleItem = ({ item }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleRemoveFromCart = () => {
-    dispatch(removeItemFromCart(item.id));
+    if (item.dbItemId) {
+      dispatch(removeItemFromCartDb({ id: item.id, dbItemId: item.dbItemId }));
+    } else {
+      dispatch(removeItemFromCart(item.id));
+    }
   };
 
   const handleIncreaseQuantity = () => {
-    setQuantity(quantity + 1);
-    dispatch(updateCartItemQuantity({ id: item.id, quantity: quantity + 1 }));
+    const newQty = quantity + 1;
+    setQuantity(newQty);
+    if (item.dbItemId) {
+      dispatch(updateCartItemQuantityDb({ id: item.id, dbItemId: item.dbItemId, quantity: newQty }));
+    } else {
+      dispatch(updateCartItemQuantity({ id: item.id, quantity: newQty }));
+    }
   };
 
   const handleDecreaseQuantity = () => {
     if (quantity > 1) {
-      setQuantity(quantity - 1);
-      dispatch(updateCartItemQuantity({ id: item.id, quantity: quantity - 1 }));
+      const newQty = quantity - 1;
+      setQuantity(newQty);
+      if (item.dbItemId) {
+        dispatch(updateCartItemQuantityDb({ id: item.id, dbItemId: item.dbItemId, quantity: newQty }));
+      } else {
+        dispatch(updateCartItemQuantity({ id: item.id, quantity: newQty }));
+      }
     } else {
       return;
     }
