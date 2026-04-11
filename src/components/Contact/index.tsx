@@ -1,7 +1,73 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import toast from "react-hot-toast";
+
+type FormState = {
+  first_name: string;
+  last_name: string;
+  subject: string;
+  phone: string;
+  message: string;
+};
+
+const emptyForm: FormState = {
+  first_name: "",
+  last_name: "",
+  subject: "",
+  phone: "",
+  message: "",
+};
 
 const Contact = () => {
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!form.first_name.trim()) {
+      toast.error("First name is required.");
+      return;
+    }
+    if (!form.message.trim()) {
+      toast.error("Message is required.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Failed to send message. Please try again.");
+        return;
+      }
+
+      toast.success("Message sent! We will get back to you shortly.");
+      setForm(emptyForm);
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const inputClass =
+    "rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20";
+
   return (
     <>
       <Breadcrumb title={"Contact"} pages={["contact"]} />
@@ -80,40 +146,42 @@ const Contact = () => {
                         fill="#1cc7aa"
                       />
                     </svg>
-                    Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                    Address: 7398 Smoke Ranch Road Las Vegas, Nevada 89128
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
-                    <label htmlFor="firstName" className="block mb-2.5">
+                    <label htmlFor="first_name" className="block mb-2.5">
                       First Name <span className="text-red">*</span>
                     </label>
-
                     <input
                       type="text"
-                      name="firstName"
-                      id="firstName"
-                      placeholder="Jhon"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      name="first_name"
+                      id="first_name"
+                      placeholder="John"
+                      value={form.first_name}
+                      onChange={handleChange}
+                      className={inputClass}
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="lastName" className="block mb-2.5">
-                      Last Name <span className="text-red">*</span>
+                    <label htmlFor="last_name" className="block mb-2.5">
+                      Last Name
                     </label>
-
                     <input
                       type="text"
-                      name="lastName"
-                      id="lastName"
-                      placeholder="Deo"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      name="last_name"
+                      id="last_name"
+                      placeholder="Doe"
+                      value={form.last_name}
+                      onChange={handleChange}
+                      className={inputClass}
                     />
                   </div>
                 </div>
@@ -123,13 +191,14 @@ const Contact = () => {
                     <label htmlFor="subject" className="block mb-2.5">
                       Subject
                     </label>
-
                     <input
                       type="text"
                       name="subject"
                       id="subject"
                       placeholder="Type your subject"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      value={form.subject}
+                      onChange={handleChange}
+                      className={inputClass}
                     />
                   </div>
 
@@ -137,36 +206,39 @@ const Contact = () => {
                     <label htmlFor="phone" className="block mb-2.5">
                       Phone
                     </label>
-
                     <input
                       type="text"
                       name="phone"
                       id="phone"
                       placeholder="Enter your phone"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      value={form.phone}
+                      onChange={handleChange}
+                      className={inputClass}
                     />
                   </div>
                 </div>
 
                 <div className="mb-7.5">
                   <label htmlFor="message" className="block mb-2.5">
-                    Message
+                    Message <span className="text-red">*</span>
                   </label>
-
                   <textarea
                     name="message"
                     id="message"
                     rows={5}
                     placeholder="Type your message"
+                    value={form.message}
+                    onChange={handleChange}
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                  ></textarea>
+                  />
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                  disabled={submitting}
+                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {submitting ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>
