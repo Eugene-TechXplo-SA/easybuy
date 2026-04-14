@@ -32,7 +32,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                685 Market Street,Las Vegas, LA 95820,United States.
+                6 Surrey Glen, 304 Surrey Avenue, Ferndale, Randburg, 2194
               </li>
 
               <li>
@@ -61,7 +61,7 @@ const Footer = () => {
                       fill="#1cc7aa"
                     />
                   </svg>
-                  (+099) 532-786-9843
+                  +27 11 342 8734
                 </a>
               </li>
 
@@ -338,7 +338,15 @@ const Footer = () => {
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
             <p className="text-dark font-medium">
-              &copy; {year}. All rights reserved by PimjoLabs.
+              &copy; {year}. Developed by{" "}
+              <a
+                href="https://techxplo.co.za"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue hover:underline"
+              >
+                TechXplo
+              </a>
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
