@@ -295,7 +295,7 @@ const Footer = () => {
 
                   <div>
                     <span className="block text-custom-xs">
-                      Download on the
+                      Coming Soon on the
                     </span>
                     <p className="font-medium">App Store</p>
                   </div>
@@ -322,7 +322,7 @@ const Footer = () => {
                   </svg>
 
                   <div>
-                    <span className="block text-custom-xs"> Get in On </span>
+                    <span className="block text-custom-xs">Coming Soon on</span>
                     <p className="font-medium">Google Play</p>
                   </div>
                 </a>
