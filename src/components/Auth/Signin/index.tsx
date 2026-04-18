@@ -30,6 +30,29 @@ const Signin = () => {
     return newErrors;
   };
 
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "admin@demo.com", password: "Admin1234!" }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error ?? "Demo login failed. Please try again.");
+        return;
+      }
+      toast.success("Signed in as Admin Demo!");
+      router.push("/admin");
+      router.refresh();
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -136,6 +159,18 @@ const Signin = () => {
                   <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3"></span>
                   <span className="inline-block px-3 bg-white">Or</span>
                 </span>
+
+                <button
+                  type="button"
+                  onClick={handleDemoLogin}
+                  disabled={isLoading}
+                  className="w-full flex justify-center items-center gap-2 font-medium text-dark border-2 border-dashed border-gray-4 bg-gray-1 py-3 px-6 rounded-lg ease-out duration-200 hover:border-blue hover:text-blue mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Demo Login as Admin
+                </button>
 
                 <p className="text-center mt-6">
                   Don&apos;t have an account?
