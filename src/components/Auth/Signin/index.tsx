@@ -44,7 +44,7 @@ const Signin = () => {
         return;
       }
       toast.success("Signed in as Admin Demo!");
-      router.push("/admin");
+      router.push("/my-account");
       router.refresh();
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
