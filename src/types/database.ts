@@ -89,6 +89,7 @@ export interface Database {
           last_name: string;
           phone: string;
           country: string;
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -98,6 +99,7 @@ export interface Database {
           last_name?: string;
           phone?: string;
           country?: string;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -107,6 +109,7 @@ export interface Database {
           last_name?: string;
           phone?: string;
           country?: string;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -427,6 +430,79 @@ export interface Database {
           created_at?: string;
         };
       };
+      promotions: {
+        Row: {
+          id: number;
+          title: string;
+          subtitle: string;
+          discount_label: string;
+          description: string;
+          image_url: string;
+          button_text: string;
+          button_link: string;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          title: string;
+          subtitle?: string;
+          discount_label?: string;
+          description?: string;
+          image_url?: string;
+          button_text?: string;
+          button_link?: string;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          title?: string;
+          subtitle?: string;
+          discount_label?: string;
+          description?: string;
+          image_url?: string;
+          button_text?: string;
+          button_link?: string;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      site_settings: {
+        Row: {
+          id: number;
+          store_name: string;
+          support_phone: string;
+          support_email: string;
+          store_address: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          store_name?: string;
+          support_phone?: string;
+          support_email?: string;
+          store_address?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          store_name?: string;
+          support_phone?: string;
+          support_email?: string;
+          store_address?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -459,6 +535,8 @@ export type DbWishlistItem = Tables<"wishlist_items">;
 export type DbBlogPost = Tables<"blog_posts">;
 export type DbTestimonial = Tables<"testimonials">;
 export type DbContactMessage = Tables<"contact_messages">;
+export type DbPromotion = Tables<"promotions">;
+export type DbSiteSettings = Tables<"site_settings">;
 
 export type OrderStatus = "pending" | "processing" | "on-hold" | "delivered" | "cancelled";
 export type PaymentMethod = "bank" | "cash" | "paypal";
