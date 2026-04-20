@@ -85,7 +85,13 @@ const Header = () => {
             </Link>
 
             <div className="max-w-[475px] w-full">
-              <form>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const q = searchQuery.trim();
+                  router.push(q ? `/shop-with-sidebar?search=${encodeURIComponent(q)}` : "/shop-with-sidebar");
+                }}
+              >
                 <div className="flex items-center">
                   <CustomSelect options={options} />
 

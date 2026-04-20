@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
@@ -16,6 +17,9 @@ import type { ApiCategory, Product } from "@/types/product";
 const PAGE_SIZE = 9;
 
 const ShopWithSidebar = () => {
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") ?? "";
+
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -25,6 +29,8 @@ const ShopWithSidebar = () => {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100);
   const [page, setPage] = useState(1);
+
+  useEffect(() => { setPage(1); }, [search]);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
@@ -47,6 +53,7 @@ const ShopWithSidebar = () => {
       category: selectedCategory,
       minPrice: minPrice > 0 ? minPrice : null,
       maxPrice: maxPrice < 100 ? maxPrice : null,
+      search: search || undefined,
       page,
       pageSize: PAGE_SIZE,
     })
@@ -57,7 +64,7 @@ const ShopWithSidebar = () => {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [selectedCategory, minPrice, maxPrice, page]);
+  }, [selectedCategory, minPrice, maxPrice, page, search]);
 
   const handleCategorySelect = (id: number | null) => {
     setSelectedCategory(id);

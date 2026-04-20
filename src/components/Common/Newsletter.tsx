@@ -1,12 +1,30 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 const Newsletter = () => {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!/^\S+@\S+\.\S+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, 400));
+    toast.success("You're subscribed! Check your inbox for updates.");
+    setEmail("");
+    setSubmitting(false);
+  };
+
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
         <div className="relative z-1 overflow-hidden rounded-xl">
-          {/* <!-- bg shapes --> */}
           <Image
             src="/images/shapes/newsletter-bg.jpg"
             alt="background illustration"
@@ -28,20 +46,24 @@ const Newsletter = () => {
             </div>
 
             <div className="max-w-[477px] w-full">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <input
                     type="email"
                     name="email"
                     id="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="w-full bg-gray-1 border border-gray-3 outline-none rounded-md placeholder:text-dark-4 py-3 px-5"
                   />
                   <button
                     type="submit"
-                    className="inline-flex justify-center py-3 px-7 text-white bg-blue font-medium rounded-md ease-out duration-200 hover:bg-blue-dark"
+                    disabled={submitting}
+                    className="inline-flex justify-center py-3 px-7 text-white bg-blue font-medium rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-70"
                   >
-                    Subscribe
+                    {submitting ? "Subscribing..." : "Subscribe"}
                   </button>
                 </div>
               </form>

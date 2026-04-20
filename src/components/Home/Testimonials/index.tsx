@@ -1,7 +1,8 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef } from "react";
-import testimonialsData from "./testimonialsData";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+import type { Testimonial } from "@/types/testimonial";
 import Image from "next/image";
 
 // Import Swiper styles
@@ -11,6 +12,32 @@ import SingleItem from "./SingleItem";
 
 const Testimonials = () => {
   const sliderRef = useRef(null);
+  const [items, setItems] = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("testimonials")
+      .select("review, author_name, author_role, author_img")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (!data) return;
+        const rows = data as Array<{
+          review: string;
+          author_name: string;
+          author_role: string;
+          author_img: string;
+        }>;
+        setItems(
+          rows.map((r) => ({
+            review: r.review,
+            authorName: r.author_name,
+            authorRole: r.author_role,
+            authorImg: r.author_img,
+          }))
+        );
+      });
+  }, []);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;
@@ -102,7 +129,7 @@ const Testimonials = () => {
                 },
               }}
             >
-              {testimonialsData.map((item, key) => (
+              {items.map((item, key) => (
                 <SwiperSlide key={key}>
                   <SingleItem testimonial={item} />
                 </SwiperSlide>

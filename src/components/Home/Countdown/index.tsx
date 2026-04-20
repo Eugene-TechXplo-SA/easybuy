@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const CounDown = () => {
   const [days, setDays] = useState(0);
@@ -8,21 +9,23 @@ const CounDown = () => {
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  const deadline = "December, 31, 2024";
-
-  const getTime = () => {
-    const time = Date.parse(deadline) - Date.now();
-
-    setDays(Math.floor(time / (1000 * 60 * 60 * 24)));
-    setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
-    setMinutes(Math.floor((time / 1000 / 60) % 60));
-    setSeconds(Math.floor((time / 1000) % 60));
-  };
+  const deadlineRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // @ts-ignore
-    const interval = setInterval(() => getTime(deadline), 1000);
+    if (deadlineRef.current === null) {
+      deadlineRef.current = Date.now() + 14 * 24 * 60 * 60 * 1000;
+    }
 
+    const tick = () => {
+      const time = Math.max((deadlineRef.current ?? 0) - Date.now(), 0);
+      setDays(Math.floor(time / (1000 * 60 * 60 * 24)));
+      setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
+      setMinutes(Math.floor((time / 1000 / 60) % 60));
+      setSeconds(Math.floor((time / 1000) % 60));
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -103,12 +106,12 @@ const CounDown = () => {
             </div>
             {/* <!-- Countdown timer ends --> */}
 
-            <a
-              href="#"
+            <Link
+              href="/shop-with-sidebar"
               className="inline-flex font-medium text-custom-sm text-white bg-blue py-3 px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
             >
-              Check it Out!
-            </a>
+              Shop Now
+            </Link>
           </div>
 
           {/* <!-- bg shapes --> */}
