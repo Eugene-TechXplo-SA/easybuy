@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Newsletter from "../Common/Newsletter";
@@ -7,8 +7,14 @@ import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { formatZar } from "@/lib/formatCurrency";
+import type { ApiProduct } from "@/types/product";
+import { apiProductToProduct } from "@/types/product";
 
-const ShopDetails = () => {
+interface Props {
+  product?: ApiProduct;
+}
+
+const ShopDetails = ({ product: productProp }: Props) => {
   const [activeColor, setActiveColor] = useState("blue");
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
@@ -80,22 +86,28 @@ const ShopDetails = () => {
     (state) => state.productDetailsReducer.value
   );
 
-  const [product, setProduct] = React.useState(productFromRedux);
+  const [product, setProduct] = useState(() =>
+    productProp ? apiProductToProduct(productProp) : productFromRedux
+  );
 
   useEffect(() => {
+    if (productProp) {
+      setProduct(apiProductToProduct(productProp));
+      return;
+    }
     const stored = localStorage.getItem("productDetails");
     if (stored) {
       setProduct(JSON.parse(stored));
     } else {
       setProduct(productFromRedux);
     }
-  }, [productFromRedux]);
+  }, [productProp, productFromRedux]);
 
   useEffect(() => {
-    if (product && product.title) {
+    if (!productProp && product && product.title) {
       localStorage.setItem("productDetails", JSON.stringify(product));
     }
-  }, [product]);
+  }, [productProp, product]);
 
   // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
