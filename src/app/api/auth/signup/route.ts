@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
-import type { InsertTables } from "@/types/database";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,15 +20,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const adminClient = createAdminClient();
+    const nameParts = fullName.trim().split(" ");
+    const firstName = nameParts[0] ?? "";
+    const lastName = nameParts.slice(1).join(" ") ?? "";
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await adminClient.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: undefined,
-      },
+      user_metadata: { first_name: firstName, last_name: lastName, full_name: fullName },
+      email_confirm: true,
     });
 
     if (error) {
@@ -37,18 +37,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (data.user) {
-      const adminClient = createAdminClient();
-      const nameParts = fullName.trim().split(" ");
-      const firstName = nameParts[0] ?? "";
-      const lastName = nameParts.slice(1).join(" ") ?? "";
-
-      const profileData: InsertTables<"user_profiles"> = {
-        id: data.user.id,
-        first_name: firstName,
-        last_name: lastName,
-      };
-
-      await adminClient.from("user_profiles").insert(profileData as never);
+      await adminClient
+        .from("user_profiles")
+        .upsert({ id: data.user.id, first_name: firstName, last_name: lastName } as never);
     }
 
     return NextResponse.json({ success: true }, { status: 201 });

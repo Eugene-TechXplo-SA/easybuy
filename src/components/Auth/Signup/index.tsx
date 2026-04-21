@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { createClient } from "@/lib/supabase/client";
 
 const Signup = () => {
   const router = useRouter();
@@ -28,9 +29,7 @@ const Signup = () => {
       confirmPassword?: string;
     } = {};
 
-    if (!fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
+    if (!fullName.trim()) newErrors.fullName = "Full name is required";
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -63,21 +62,31 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, fullName }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
+      if (!res.ok) {
         toast.error(data.error ?? "Sign up failed. Please try again.");
         return;
       }
 
-      toast.success("Account created! Please sign in.");
-      router.push("/signin");
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) {
+        toast.success("Account created! Please sign in.");
+        router.push("/signin");
+        return;
+      }
+
+      toast.success("Account created! Welcome.");
+      router.push("/my-account");
+      router.refresh();
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
@@ -104,7 +113,6 @@ const Signup = () => {
                   <label htmlFor="name" className="block mb-2.5">
                     Full Name <span className="text-red">*</span>
                   </label>
-
                   <input
                     type="text"
                     name="name"
@@ -125,7 +133,6 @@ const Signup = () => {
                   <label htmlFor="email" className="block mb-2.5">
                     Email Address <span className="text-red">*</span>
                   </label>
-
                   <input
                     type="email"
                     name="email"
@@ -146,7 +153,6 @@ const Signup = () => {
                   <label htmlFor="password" className="block mb-2.5">
                     Password <span className="text-red">*</span>
                   </label>
-
                   <input
                     type="password"
                     name="password"
@@ -168,7 +174,6 @@ const Signup = () => {
                   <label htmlFor="re-type-password" className="block mb-2.5">
                     Re-type Password <span className="text-red">*</span>
                   </label>
-
                   <input
                     type="password"
                     name="re-type-password"
