@@ -36,8 +36,10 @@ const Signin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted, loginMode:", loginMode, "email:", email, "password:", password);
 
     const validationErrors = validate();
+    console.log("Validation errors:", validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -48,24 +50,30 @@ const Signin = () => {
 
     try {
       const supabase = createClient();
+      console.log("Attempting sign in...");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
+        console.error("Sign in error:", error);
         toast.error(error.message ?? "Sign in failed. Please try again.");
+        setIsLoading(false);
         return;
       }
 
+      console.log("Sign in successful, loginMode:", loginMode);
       toast.success("Signed in successfully!");
 
       if (loginMode === "admin") {
+        console.log("Redirecting to admin");
         router.push("/admin");
       } else {
+        console.log("Redirecting to customer dashboard");
         router.push(redirectTo);
       }
       router.refresh();
-    } catch {
+    } catch (error) {
+      console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -153,7 +161,7 @@ const Signin = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isLoading ? "Signing in..." : "Sign in to account"}
               </button>
