@@ -6,11 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
 
+type LoginMode = "customer" | "admin";
+
 const Signin = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "/my-account";
 
+  const [loginMode, setLoginMode] = useState<LoginMode>("customer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -54,13 +57,11 @@ const Signin = () => {
 
       toast.success("Signed in successfully!");
 
-      // Check if user is admin via API
-      const adminCheckResponse = await fetch("/api/auth/check-admin");
-      const { is_admin } = await adminCheckResponse.json();
-
-      // Redirect to admin dashboard if user is admin, otherwise to customer dashboard
-      const destination = is_admin ? "/admin" : redirectTo;
-      router.push(destination);
+      if (loginMode === "admin") {
+        router.push("/admin");
+      } else {
+        router.push(redirectTo);
+      }
       router.refresh();
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
@@ -80,6 +81,31 @@ const Signin = () => {
                 Sign In to Your Account
               </h2>
               <p>Enter your detail below</p>
+            </div>
+
+            <div className="flex gap-3 mb-8 bg-gray-1 p-1 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setLoginMode("customer")}
+                className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all duration-200 ${
+                  loginMode === "customer"
+                    ? "bg-white text-dark shadow-sm"
+                    : "text-dark-5 hover:text-dark"
+                }`}
+              >
+                Customer
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMode("admin")}
+                className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all duration-200 ${
+                  loginMode === "admin"
+                    ? "bg-white text-dark shadow-sm"
+                    : "text-dark-5 hover:text-dark"
+                }`}
+              >
+                Admin
+              </button>
             </div>
 
             <form onSubmit={handleSubmit}>
