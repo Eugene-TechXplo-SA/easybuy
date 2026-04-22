@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
-import type { DbUserProfile } from "@/types/database";
 
 const Signin = () => {
   const router = useRouter();
@@ -46,24 +45,21 @@ const Signin = () => {
 
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         toast.error(error.message ?? "Sign in failed. Please try again.");
         return;
       }
 
-      // Check if user is admin
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("is_admin")
-        .eq("id", data.user.id)
-        .maybeSingle() as { data: DbUserProfile | null };
-
       toast.success("Signed in successfully!");
 
+      // Check if user is admin via API
+      const adminCheckResponse = await fetch("/api/auth/check-admin");
+      const { is_admin } = await adminCheckResponse.json();
+
       // Redirect to admin dashboard if user is admin, otherwise to customer dashboard
-      const destination = profile?.is_admin ? "/admin" : redirectTo;
+      const destination = is_admin ? "/admin" : redirectTo;
       router.push(destination);
       router.refresh();
     } catch {
