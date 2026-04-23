@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { createClient } from "@/lib/supabase/client";
 
 const Signin = () => {
   const router = useRouter();
@@ -43,16 +44,12 @@ const Signin = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // Sign in via browser client so onAuthStateChange fires and header updates immediately
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error ?? "Sign in failed. Please try again.");
+      if (error) {
+        toast.error(error.message ?? "Sign in failed. Please try again.");
         setIsLoading(false);
         return;
       }

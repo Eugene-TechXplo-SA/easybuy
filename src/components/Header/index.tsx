@@ -19,7 +19,7 @@ const Header = () => {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const { openCartModal } = useCartModalContext();
-  const { user, signOut } = useAuth();
+  const { user, firstName, signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -205,7 +205,7 @@ const Header = () => {
                           account
                         </span>
                         <p className="font-medium text-custom-sm text-dark">
-                          My Account
+                          {firstName ? `Hi, ${firstName}` : "My Account"}
                         </p>
                       </div>
                     </Link>
