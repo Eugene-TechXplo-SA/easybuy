@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,33 +20,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminClient = createAdminClient();
     const nameParts = fullName.trim().split(" ");
     const firstName = nameParts[0] ?? "";
     const lastName = nameParts.slice(1).join(" ") ?? "";
 
-    const { data, error } = await adminClient.auth.admin.createUser({
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => [], setAll: () => {} } }
+    );
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      user_metadata: { first_name: firstName, last_name: lastName, full_name: fullName },
-      email_confirm: true,
+      options: {
+        data: { first_name: firstName, last_name: lastName, full_name: fullName },
+      },
     });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    if (data.user) {
-      await adminClient
-        .from("user_profiles")
-        .upsert({ id: data.user.id, first_name: firstName, last_name: lastName } as never);
+    if (!data.user) {
+      return NextResponse.json(
+        { error: "Could not create account. Please try again." },
+        { status: 400 }
+      );
     }
 
+    // Profile row is created automatically by the handle_new_user trigger on auth.users
+
     return NextResponse.json({ success: true }, { status: 201 });
-  } catch {
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 }
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "An unexpected error occurred";
+    console.error("Signup error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
