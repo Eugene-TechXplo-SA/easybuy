@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { createClient } from "@/lib/supabase/client";
 
 type LoginMode = "customer" | "admin";
 
@@ -36,10 +35,8 @@ const Signin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted, loginMode:", loginMode, "email:", email, "password:", password);
 
     const validationErrors = validate();
-    console.log("Validation errors:", validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -49,30 +46,29 @@ const Signin = () => {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      console.log("Attempting sign in...");
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (error) {
-        console.error("Sign in error:", error);
-        toast.error(error.message ?? "Sign in failed. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error ?? "Sign in failed. Please try again.");
         setIsLoading(false);
         return;
       }
 
-      console.log("Sign in successful, loginMode:", loginMode);
       toast.success("Signed in successfully!");
+      router.refresh();
 
       if (loginMode === "admin") {
-        console.log("Redirecting to admin");
         router.push("/admin");
       } else {
-        console.log("Redirecting to customer dashboard");
         router.push(redirectTo);
       }
-      router.refresh();
-    } catch (error) {
-      console.error("Unexpected error:", error);
+    } catch {
       toast.error("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
@@ -88,7 +84,7 @@ const Signin = () => {
               <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark mb-1.5">
                 Sign In to Your Account
               </h2>
-              <p>Enter your detail below</p>
+              <p>Enter your details below</p>
             </div>
 
             <div className="flex gap-3 mb-8 bg-gray-1 p-1 rounded-lg">
@@ -167,8 +163,8 @@ const Signin = () => {
               </button>
 
               <p className="text-center mt-6">
-                Don&apos;t have an account?
-                <Link href="/signup" className="text-dark ease-out duration-200 hover:text-blue pl-2">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="text-dark ease-out duration-200 hover:text-blue">
                   Sign Up Now!
                 </Link>
               </p>

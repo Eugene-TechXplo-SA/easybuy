@@ -22,8 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
       setLoading(false);
     });
 
@@ -36,8 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await fetch("/api/auth/signout", { method: "POST" });
-    const supabase = createClient();
-    await supabase.auth.signOut();
     setUser(null);
   };
 

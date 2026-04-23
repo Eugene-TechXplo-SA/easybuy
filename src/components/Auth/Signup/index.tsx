@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { createClient } from "@/lib/supabase/client";
 
 const Signup = () => {
   const router = useRouter();
@@ -75,18 +74,21 @@ const Signup = () => {
         return;
       }
 
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const signInRes = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (signInError) {
+      if (!signInRes.ok) {
         toast.success("Account created! Please sign in.");
         router.push("/signin");
         return;
       }
 
       toast.success("Account created! Welcome.");
-      router.push("/my-account");
       router.refresh();
+      router.push("/my-account");
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

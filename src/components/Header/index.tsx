@@ -25,8 +25,8 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully");
-    router.push("/");
     router.refresh();
+    router.push("/");
   };
 
   const product = useAppSelector((state) => state.cartReducer.items);
