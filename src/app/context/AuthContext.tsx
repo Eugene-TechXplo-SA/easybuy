@@ -22,29 +22,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("user_profiles")
-      .select("first_name")
-      .eq("id", userId)
-      .maybeSingle() as { data: { first_name: string } | null; error: unknown };
-    setFirstName(data ? (data.first_name || null) : null);
-  };
-
   useEffect(() => {
     const supabase = createClient();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) {
+        const meta = session.user.user_metadata;
+        setFirstName(meta?.first_name || null);
+      }
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        (async () => { await fetchProfile(session.user.id); })();
+        const meta = session.user.user_metadata;
+        setFirstName(meta?.first_name || null);
       } else {
         setFirstName(null);
       }

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { createClient } from "@/lib/supabase/client";
 
 type Address = {
   id?: string;
@@ -81,25 +82,58 @@ const AddressModal = ({ isOpen, closeModal, address, onSaved }: Props) => {
     setSaving(true);
 
     try {
-      const isEdit = !!form.id;
-      const url = isEdit ? `/api/addresses/${form.id}` : "/api/addresses";
-      const method = isEdit ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const json = await res.json();
-        toast.error(json.error || "Failed to save address.");
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("You must be signed in.");
         return;
       }
 
-      const json = await res.json();
+      const isEdit = !!form.id;
+      const payload = {
+        type: form.type,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        company: form.company,
+        country: form.country,
+        street_address: form.street_address,
+        street_address_2: form.street_address_2,
+        city: form.city,
+        phone: form.phone,
+        email: form.email,
+        is_default: form.is_default,
+      };
+
+      let data: Address | null = null;
+      let error: unknown = null;
+
+      if (isEdit) {
+        const result = await supabase
+          .from("addresses")
+          .update(payload as never)
+          .eq("id", form.id!)
+          .eq("user_id", session.user.id)
+          .select()
+          .maybeSingle() as { data: Address | null; error: unknown };
+        data = result.data;
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from("addresses")
+          .insert({ ...payload, user_id: session.user.id } as never)
+          .select()
+          .maybeSingle() as { data: Address | null; error: unknown };
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) {
+        toast.error("Failed to save address.");
+        return;
+      }
+
       toast.success(isEdit ? "Address updated." : "Address saved.");
-      onSaved(json.address);
+      if (data) onSaved(data);
       closeModal();
     } catch {
       toast.error("An unexpected error occurred.");

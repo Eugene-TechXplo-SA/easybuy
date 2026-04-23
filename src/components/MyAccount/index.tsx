@@ -9,6 +9,7 @@ import AddressModal from "./AddressModal";
 import AddressCard from "./AddressCard";
 import DashboardTab from "./DashboardTab";
 import AccountDetailsTab from "./AccountDetailsTab";
+import { createClient } from "@/lib/supabase/client";
 
 type Profile = {
   first_name: string;
@@ -86,24 +87,35 @@ const MyAccount = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
 
   useEffect(() => {
-    fetch("/api/profile")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.profile) setProfile(data.profile);
-        if (data.email) setEmail(data.email);
-      })
-      .catch(() => {});
+    const supabase = createClient();
 
-    fetch("/api/addresses")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.addresses) setAddresses(data.addresses);
-      })
-      .catch(() => {});
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      setEmail(session.user.email ?? "");
+
+      const { data: profileData } = await supabase
+        .from("user_profiles")
+        .select("first_name, last_name, phone, country")
+        .eq("id", session.user.id)
+        .maybeSingle() as { data: Profile | null; error: unknown };
+
+      if (profileData) setProfile(profileData);
+
+      const { data: addressData } = await supabase
+        .from("addresses")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false }) as { data: Address[] | null; error: unknown };
+
+      if (addressData) setAddresses(addressData);
+    })();
   }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/signout", { method: "POST" });
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/signin");
   };
 
@@ -139,8 +151,9 @@ const MyAccount = () => {
 
   const handleAddressDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/addresses/${id}`, { method: "DELETE" });
-      if (!res.ok) {
+      const supabase = createClient();
+      const { error } = await supabase.from("addresses").delete().eq("id", id);
+      if (error) {
         toast.error("Failed to delete address.");
         return;
       }

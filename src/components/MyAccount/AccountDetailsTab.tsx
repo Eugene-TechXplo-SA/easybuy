@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { createClient } from "@/lib/supabase/client";
 
 type Profile = {
   first_name: string;
@@ -35,20 +36,26 @@ const AccountDetailsTab = ({ profile, onProfileUpdated }: Props) => {
     setSaving(true);
 
     try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const json = await res.json();
-        toast.error(json.error || "Failed to update profile.");
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("You must be signed in.");
         return;
       }
 
-      const json = await res.json();
-      onProfileUpdated(json.profile);
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .update(form as never)
+        .eq("id", session.user.id)
+        .select("first_name, last_name, phone, country")
+        .maybeSingle() as { data: Profile | null; error: unknown };
+
+      if (error) {
+        toast.error("Failed to update profile.");
+        return;
+      }
+
+      if (data) onProfileUpdated(data);
       toast.success("Profile updated.");
     } catch {
       toast.error("An unexpected error occurred.");
