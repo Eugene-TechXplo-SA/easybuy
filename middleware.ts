@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 const PROTECTED_ROUTES = ["/checkout", "/my-account", "/wishlist", "/cart"];
-const ADMIN_ROUTE_PREFIX = "/admin";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,9 +9,8 @@ export async function middleware(request: NextRequest) {
   const isProtected = PROTECTED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
-  const isAdminRoute = pathname === ADMIN_ROUTE_PREFIX || pathname.startsWith(`${ADMIN_ROUTE_PREFIX}/`);
 
-  if (!isProtected && !isAdminRoute) {
+  if (!isProtected) {
     return NextResponse.next();
   }
 
@@ -48,24 +46,8 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/signin";
-    if (!isAdminRoute) {
-      redirectUrl.searchParams.set("redirectTo", pathname);
-    }
+    redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
-  }
-
-  if (isAdminRoute) {
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!profile?.is_admin) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/";
-      return NextResponse.redirect(redirectUrl);
-    }
   }
 
   return response;
@@ -81,7 +63,5 @@ export const config = {
     "/wishlist/:path*",
     "/cart",
     "/cart/:path*",
-    "/admin",
-    "/admin/:path*",
   ],
 };
