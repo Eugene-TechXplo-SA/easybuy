@@ -39,12 +39,24 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
+      // Surface the exact Supabase error to the client
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    // Supabase returns a fake user object when email confirmation is required
+    // but the user doesn't exist yet — identities array will be empty in that case.
+    // When email confirmation is disabled, identities will have one entry.
     if (!data.user) {
       return NextResponse.json(
         { error: "Could not create account. Please try again." },
+        { status: 400 }
+      );
+    }
+
+    if (data.user.identities?.length === 0) {
+      // Email confirmation is enabled — user must confirm before signing in
+      return NextResponse.json(
+        { error: "Please check your email to confirm your account before signing in." },
         { status: 400 }
       );
     }
