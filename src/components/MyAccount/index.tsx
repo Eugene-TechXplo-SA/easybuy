@@ -10,6 +10,7 @@ import AddressCard from "./AddressCard";
 import DashboardTab from "./DashboardTab";
 import AccountDetailsTab from "./AccountDetailsTab";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/app/context/AuthContext";
 
 type Profile = {
   first_name: string;
@@ -79,6 +80,7 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
 
 const MyAccount = () => {
   const router = useRouter();
+  const { user, firstName: authFirstName } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [addressModal, setAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -164,10 +166,9 @@ const MyAccount = () => {
     }
   };
 
-  const fullName =
-    profile?.first_name || profile?.last_name
-      ? `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim()
-      : "Member";
+  const firstName = profile?.first_name || authFirstName || user?.user_metadata?.first_name || "";
+  const lastName = profile?.last_name || "";
+  const fullName = (firstName + " " + lastName).trim() || user?.email?.split("@")[0] || "Member";
 
   return (
     <>
