@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createBrowserClient } from "@supabase/supabase-js";
 import type { ApiProduct } from "@/types/product";
 import ShopDetails from "@/components/ShopDetails";
 import type { Metadata } from "next";
@@ -9,9 +9,16 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+function getAnonClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = getAnonClient();
   const { data } = await supabase
     .from("products")
     .select("title")
@@ -31,7 +38,7 @@ export default async function ShopDetailsPage({ params }: Props) {
 
   if (!productId || isNaN(productId)) notFound();
 
-  const supabase = await createClient();
+  const supabase = getAnonClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
