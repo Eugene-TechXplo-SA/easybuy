@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://cgmlroqsxmrlifsqgbom.supabase.co";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWxyb3FzeG1ybGlmc3FnYm9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDEyMjQsImV4cCI6MjA5MTMxNzIyNH0.6trYNCH-kETbzDk8-d2o_RXzkpguLwjg7dGqrfIk2L0";
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow signin page and API routes through
   if (pathname.startsWith("/signin") || pathname.startsWith("/api/")) {
     return NextResponse.next({ request });
   }
@@ -12,8 +14,8 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -45,8 +47,10 @@ export async function middleware(request: NextRequest) {
     .maybeSingle();
 
   if (!profile?.is_admin) {
+    await supabase.auth.signOut();
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
+    url.searchParams.set("error", "not_admin");
     return NextResponse.redirect(url);
   }
 
