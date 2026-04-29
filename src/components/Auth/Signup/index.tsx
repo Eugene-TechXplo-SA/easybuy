@@ -2,12 +2,9 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const Signup = () => {
-  const router = useRouter();
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,11 +80,10 @@ const Signup = () => {
 
       if (signinRes.ok) {
         toast.success("Account created! Welcome.");
-        router.refresh();
-        router.push("/my-account");
+        window.location.href = "/my-account";
       } else {
         toast.success("Account created! Please sign in.");
-        router.push("/signin");
+        window.location.href = "/signin";
       }
     } catch {
       toast.error("An unexpected error occurred. Please try again.");

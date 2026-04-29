@@ -1,10 +1,13 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+
+interface AuthUser {
+  id: string;
+  email: string | undefined;
+}
 
 interface AuthContextValue {
-  user: User | null;
+  user: AuthUser | null;
   firstName: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -17,34 +20,30 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
 });
 
+async function fetchUser(): Promise<{ user: AuthUser | null; firstName: string | null }> {
+  try {
+    const res = await fetch("/api/auth/user");
+    if (!res.ok) return { user: null, firstName: null };
+    const data = await res.json();
+    if (!data.user) return { user: null, firstName: null };
+    const firstName = data.user.firstName ?? data.user.fullName?.split(" ")[0] ?? null;
+    return { user: { id: data.user.id, email: data.user.email }, firstName };
+  } catch {
+    return { user: null, firstName: null };
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const meta = session.user.user_metadata;
-        setFirstName(meta?.first_name || null);
-      }
+    fetchUser().then(({ user, firstName }) => {
+      setUser(user);
+      setFirstName(firstName);
       setLoading(false);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const meta = session.user.user_metadata;
-        setFirstName(meta?.first_name || null);
-      } else {
-        setFirstName(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {

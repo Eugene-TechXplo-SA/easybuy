@@ -2,11 +2,10 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 const Signin = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "/my-account";
 
@@ -57,8 +56,7 @@ const Signin = () => {
       }
 
       toast.success("Signed in successfully!");
-      router.refresh();
-      router.push(redirectTo);
+      window.location.href = redirectTo;
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

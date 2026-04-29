@@ -166,7 +166,7 @@ const MyAccount = () => {
     }
   };
 
-  const firstName = profile?.first_name || authFirstName || user?.user_metadata?.first_name || "";
+  const firstName = profile?.first_name || authFirstName || "";
   const lastName = profile?.last_name || "";
   const fullName = (firstName + " " + lastName).trim() || user?.email?.split("@")[0] || "Member";
 
