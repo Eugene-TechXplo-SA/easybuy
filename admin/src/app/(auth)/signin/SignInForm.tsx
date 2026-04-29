@@ -11,17 +11,18 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("error") === "not_admin") {
-      setError("You do not have admin access.");
+    const urlError = searchParams.get("error");
+    if (urlError === "not_admin") {
+      setError("This account does not have admin access.");
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const supabase = createClient();
 
+    const supabase = createClient();
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
@@ -31,13 +32,23 @@ export default function SignInForm() {
     }
 
     if (!data.session) {
-      setError("Sign in failed — no session returned. Please try again.");
+      setError("Sign in failed — no session returned.");
+      setLoading(false);
+      return;
+    }
+
+    // Check is_admin from the JWT app_metadata directly — no DB call needed
+    const isAdmin = data.session.user.app_metadata?.is_admin === true;
+
+    if (!isAdmin) {
+      await supabase.auth.signOut();
+      setError("This account does not have admin access.");
       setLoading(false);
       return;
     }
 
     window.location.href = "/";
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

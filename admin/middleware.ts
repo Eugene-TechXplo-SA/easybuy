@@ -8,46 +8,39 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/signin") || pathname.startsWith("/api/")) {
-    return NextResponse.next({ request });
+    return NextResponse.next();
   }
 
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // getSession decodes the JWT cookie locally — no network call, no RLS
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     return NextResponse.redirect(url);
   }
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .maybeSingle();
+  // is_admin is stored in app_metadata (server-controlled, not forgeable)
+  const isAdmin = session.user.app_metadata?.is_admin === true;
 
-  if (!profile?.is_admin) {
-    await supabase.auth.signOut();
+  if (!isAdmin) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     url.searchParams.set("error", "not_admin");

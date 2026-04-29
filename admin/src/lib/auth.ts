@@ -16,17 +16,22 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
     redirect("/signin");
   }
 
+  // Check JWT app_metadata first — no DB call needed for the gate
+  const isAdminFromJwt = user.app_metadata?.is_admin === true;
+
+  if (!isAdminFromJwt) {
+    redirect("/signin?error=not_admin");
+  }
+
   const { data } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
-  const profile = data as DbUserProfile | null;
-
-  if (!profile || !profile.is_admin) {
+  if (!data) {
     redirect("/signin");
   }
 
-  return { userId: user.id, profile };
+  return { userId: user.id, profile: data as DbUserProfile };
 }
