@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 export default function AdminSignInForm() {
   const searchParams = useSearchParams();
@@ -21,29 +20,30 @@ export default function AdminSignInForm() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const res = await fetch("/api/admin/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (authError) {
-      setError(authError.message || "Sign in failed. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === "not_admin") {
+          setError("This account does not have admin access.");
+        } else {
+          setError(data.error || "Sign in failed. Please try again.");
+        }
+        return;
+      }
+
+      window.location.href = "/admin";
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (!data.session) {
-      setError("Sign in failed — no session returned.");
-      setLoading(false);
-      return;
-    }
-
-    if (data.session.user.app_metadata?.is_admin !== true) {
-      await supabase.auth.signOut();
-      setError("This account does not have admin access.");
-      setLoading(false);
-      return;
-    }
-
-    window.location.href = "/admin";
   }
 
   return (
