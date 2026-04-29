@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { createClient } from "@/lib/supabase/client";
 
 const Signup = () => {
   const router = useRouter();
@@ -62,27 +61,34 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const nameParts = fullName.trim().split(" ");
-      const firstName = nameParts[0] ?? "";
-      const lastName = nameParts.slice(1).join(" ") ?? "";
-
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { first_name: firstName, last_name: lastName, full_name: fullName },
-        },
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, fullName }),
       });
 
-      if (signUpError) {
-        toast.error(signUpError.message ?? "Sign up failed. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error ?? "Sign up failed. Please try again.");
         return;
       }
 
-      toast.success("Account created! Welcome.");
-      router.refresh();
-      router.push("/my-account");
+      // Auto sign in after successful registration
+      const signinRes = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (signinRes.ok) {
+        toast.success("Account created! Welcome.");
+        router.refresh();
+        router.push("/my-account");
+      } else {
+        toast.success("Account created! Please sign in.");
+        router.push("/signin");
+      }
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

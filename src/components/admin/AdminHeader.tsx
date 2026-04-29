@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 interface AdminHeaderProps {
   firstName: string;
@@ -12,8 +11,7 @@ export default function AdminHeader({ firstName, lastName }: AdminHeaderProps) {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await fetch("/api/auth/signout", { method: "POST" });
     router.push("/admin/signin");
     router.refresh();
   };
